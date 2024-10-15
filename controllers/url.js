@@ -1,4 +1,4 @@
-const { shortid } = require("shortid");
+const shortid = require("shortid");
 const URL = require("../models/url");
 
 const generateNewShortUrl = async (req, res) => {
@@ -13,9 +13,31 @@ const generateNewShortUrl = async (req, res) => {
     visitHistory: [],
   });
 
-  return res.status(201).json({ message: "Short url created" });
+  return res.status(201).json({ message: "Short url created", id: shortId });
+};
+
+const getUrl = async (req, res) => {
+  const shortId = req.params.id;
+  const entry = await URL.findOneAndUpdate(
+    { shortId },
+    { $push: { visitHistory: { timestamp: Date.now() } } }
+  );
+  if (!entry) return res.status(404).json({ message: "URL not found" });
+
+  res.redirect(entry.redirectURL);
+};
+
+const getAnalytics = async (req, res) => {
+  const shortId = req.params.id;
+  const result = await URL.findOne({ shortId });
+  return res.json({
+    totalClicks: result.visitHistory.length,
+    analytics: result.visitHistory,
+  });
 };
 
 module.exports = {
-    generateNewShortUrl,
-}
+  generateNewShortUrl,
+  getUrl,
+  getAnalytics,
+};
