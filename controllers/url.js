@@ -13,7 +13,7 @@ const generateNewShortUrl = async (req, res) => {
     visitHistory: [],
   });
 
-  return res.status(201).json({ message: "Short url created", id: shortId });
+  return res.render("home", { id: shortId });
 };
 
 const getUrl = async (req, res) => {
